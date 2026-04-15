@@ -45,6 +45,11 @@ interface TimeEntryFormProps {
   onSuccess?: () => void;
   timeFrameId: string;
   useStopwatchValue?: boolean;
+  existingEntries?: TimeEntryResource[];
+  onMergeNeeded?: (
+    existingEntry: TimeEntryResource,
+    newEntry: TimeEntryResource,
+  ) => void;
 }
 
 export default function TimeEntryForm({
@@ -53,6 +58,8 @@ export default function TimeEntryForm({
   onSuccess,
   timeFrameId,
   useStopwatchValue = false,
+  existingEntries,
+  onMergeNeeded,
 }: TimeEntryFormProps) {
   const [serverErrors, setServerErrors] = useState<GenericErrorResponse>({});
   const { dismiss } = useDismissModal();
@@ -76,7 +83,7 @@ export default function TimeEntryForm({
   const [startTime, setStartTime] = useState(startDateTime.time || currentTime);
   const [endTime, setEndTime] = useState(endDateTime.time || '');
 
-  const { totalSeconds } = usePersistedStopWatch();
+  const { totalSeconds, resetWithReference } = usePersistedStopWatch();
 
   const form = useForm<TimeEntryFormType>({
     resolver: zodResolver(TIME_ENTRY_SCHEMA),
@@ -130,7 +137,6 @@ export default function TimeEntryForm({
           : await createTimeEntry({
               payload,
             });
-
       if (response.status > 299) {
         throw new Error(
           `Failed to ${mode === 'edit' ? 'update' : 'create'} time entry`,
@@ -139,14 +145,32 @@ export default function TimeEntryForm({
 
       dismiss();
 
+      if (useStopwatchValue) {
+        // reset the persisted stopwatch value so it doesn't affect future entries.
+        resetWithReference();
+      }
+
       toast.success(
         `Time entry ${mode === 'edit' ? 'updated' : 'created'} successfully`,
       );
 
       onSuccess?.();
       router.invalidate();
+
+      if (mode === 'create' && onMergeNeeded) {
+        const createdEntry = response.data;
+        const sameDayEntries = (existingEntries ?? []).filter(
+          (e) =>
+            e.attributes.workDay === createdEntry.attributes.workDay &&
+            e.id !== createdEntry.id,
+        );
+
+        // Design choice. If there are multiple entries, it means the user has rejected a merge before on that day, so we won't prompt them again. Might change later.
+        if (sameDayEntries.length === 1) {
+          onMergeNeeded(sameDayEntries[0], createdEntry);
+        }
+      }
     } catch (error) {
-      console.error('Error submitting time entry form:', error);
       const { statusCode, errors } = parseError(error);
       toast.error(`Request failed with status code ${statusCode}`);
       setServerErrors((prev) => ({ ...prev, ...errors }));

@@ -39,3 +39,8 @@ export type TimeEntryResource = ApiResource<
   TimeEntryInc,
   TimeEntryRel
 >;
+
+export interface MergeData {
+  existingEntry: TimeEntryResource;
+  newEntry: TimeEntryResource;
+}

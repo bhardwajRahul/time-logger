@@ -1,7 +1,9 @@
+import { MergeTimeEntryDialog } from '@/components/custom/dialog/MergeTimeEntryDialog';
 import { TimeEntryDialog } from '@/components/custom/dialog/TimeEntryDialog';
 import { TimeEntryStopwatchDialog } from '@/components/custom/dialog/TimeEntryStopwatchDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import useMergeEntry from '@/hooks/use-merge-entry';
 import type { TimeEntryResource } from '@/interfaces/entity/time-entry';
 import dayjs from '@/lib/dayjs';
 import { IconPlayerPlay, IconPlus } from '@tabler/icons-react';
@@ -62,69 +64,92 @@ export default function TimeEntries({
   currency,
   hourlyRate,
 }: TimeEntriesProps) {
+  const { mergeData, handleMergeNeeded, clearMergeData } = useMergeEntry();
   const weekGroups = useMemo(
     () => (entries && entries.length > 0 ? groupEntriesByWeek(entries) : []),
     [entries],
   );
 
   return (
-    <Card>
-      <div className="flex max-md:flex-col justify-between gap-2 px-6">
-        <div className="space-y-1">
-          <h2 className="title">Time Entries</h2>
-          <p className="text-muted-foreground">
-            All time entries recorded for this time frame.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <TimeEntryStopwatchDialog timeFrameId={timeFrameId}>
-            <Button variant="outline">
-              <IconPlayerPlay />
-              Start Stopwatch
-            </Button>
-          </TimeEntryStopwatchDialog>
-          <TimeEntryDialog mode="create" timeFrameId={timeFrameId}>
-            <Button>
-              <IconPlus />
-              Add Entry
-            </Button>
-          </TimeEntryDialog>
-        </div>
-      </div>
-      <CardContent className="space-y-2">
-        {weekGroups.length > 0 ? (
+    <>
+      <Card>
+        <div className="flex max-md:flex-col justify-between gap-2 px-6">
           <div className="space-y-1">
-            {weekGroups.map((group) => (
-              <div key={group.weekKey}>
-                <div className="flex items-center gap-3 px-1 py-1.5">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Week {group.weekNumber}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {group.dateRange}
-                  </span>
-                  <div className="flex-1 h-px bg-border" />
-                  <span className="text-xs font-medium text-muted-foreground tabular-nums">
-                    {formatWeekTotal(group.totalMinutes)}
-                  </span>
+            <h2 className="title">Time Entries</h2>
+            <p className="text-muted-foreground">
+              All time entries recorded for this time frame.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <TimeEntryStopwatchDialog
+              timeFrameId={timeFrameId}
+              existingEntries={entries?.slice(0, 10)}
+              onMergeNeeded={handleMergeNeeded}
+            >
+              <Button variant="outline">
+                <IconPlayerPlay />
+                Start Stopwatch
+              </Button>
+            </TimeEntryStopwatchDialog>
+            <TimeEntryDialog
+              mode="create"
+              timeFrameId={timeFrameId}
+              existingEntries={entries?.slice(0, 10)}
+              onMergeNeeded={handleMergeNeeded}
+            >
+              <Button>
+                <IconPlus />
+                Add Entry
+              </Button>
+            </TimeEntryDialog>
+          </div>
+        </div>
+        <CardContent className="space-y-2">
+          {weekGroups.length > 0 ? (
+            <div className="space-y-1">
+              {weekGroups.map((group) => (
+                <div key={group.weekKey}>
+                  <div className="flex items-center gap-3 px-1 py-1.5">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Week {group.weekNumber}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {group.dateRange}
+                    </span>
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                      {formatWeekTotal(group.totalMinutes)}
+                    </span>
+                  </div>
+                  {group.entries.map((entry) => (
+                    <TimeEntry
+                      key={entry.id}
+                      entry={entry}
+                      currency={currency}
+                      hourlyRate={hourlyRate}
+                    />
+                  ))}
                 </div>
-                {group.entries.map((entry) => (
-                  <TimeEntry
-                    key={entry.id}
-                    entry={entry}
-                    currency={currency}
-                    hourlyRate={hourlyRate}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            No time entries recorded yet
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No time entries recorded yet
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {mergeData && (
+        <MergeTimeEntryDialog
+          open={!!mergeData}
+          onOpenChange={(open) => {
+            if (!open) clearMergeData();
+          }}
+          existingEntry={mergeData.existingEntry}
+          newEntry={mergeData.newEntry}
+        />
+      )}
+    </>
   );
 }

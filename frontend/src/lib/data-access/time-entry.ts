@@ -68,3 +68,16 @@ export async function deleteTimeEntry({
 }): Promise<GenericApiRes> {
   return await deleteResource<GenericApiRes>(`/time-entries/${id}`);
 }
+
+export async function mergeTimeEntries({
+  ids,
+  description,
+}: {
+  ids: string[];
+  description: string;
+}): Promise<TimeEntry> {
+  return await postResource<TimeEntry>(`/time-entries/merge`, {
+    ids,
+    description,
+  });
+}
