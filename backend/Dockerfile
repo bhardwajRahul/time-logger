@@ -3,8 +3,11 @@
 ###############################################################################
 FROM dunglas/frankenphp:1-php8.4-alpine AS base
 
+RUN adduser -D -u 1000 -G www-data appuser
+
 RUN apk add --no-cache \
     postgresql-dev \
+    postgresql-client \
     libzip-dev \
     freetype-dev \
     libjpeg-turbo-dev \
@@ -87,12 +90,15 @@ RUN mkdir -p storage/logs \
              storage/framework/views \
              bootstrap/cache
 
-RUN chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+RUN chown appuser:www-data /app \
+    && chown -R appuser:www-data storage bootstrap/cache \
+    && chmod 755 /app \
+    && chmod -R 755 storage bootstrap/cache
 
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY docker/scheduler.sh  /usr/local/bin/scheduler.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/scheduler.sh
 
 EXPOSE 8000
 

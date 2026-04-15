@@ -108,6 +108,27 @@ Sample PDF Invoice Link: https://pub-2d4798b44c2c47d1adecc6c62bf47f38.r2.dev/git
 
 </details>
 
+# Backups
+
+Backups are handled automatically by a dedicated `scheduler` Docker container running Laravel's task scheduler. Two commands run nightly:
+
+| Time (UTC) | Command         | What it does                                              |
+|------------|-----------------|-----------------------------------------------------------|
+| 22:00      | `backup:clean`  | Deletes old backups according to the retention policy     |
+| 22:30      | `backup:run`    | Creates a new backup (database dump + application files)  |
+
+You can change the default timezone in `backend/config/app.php` under the `timezone` field. You can also change the the time at which they run from `backend/routes/console.php`.
+
+**Retention policy:** daily backups for 7 days → one per week for 4 weeks → one per month for 12 months → one per year.
+
+Backups are stored locally at `backend/storage/app/backups/` (relative to this file).
+
+To trigger a backup manually at any time:
+
+```bash
+docker compose -f backend/compose.yaml exec app php artisan backup:run
+```
+
 # TODO
 
 - [ ] Add support for authentication and multiple users

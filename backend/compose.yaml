@@ -6,6 +6,7 @@ services:
             target: production
         container_name: timelogger_app
         restart: unless-stopped
+        user: "appuser"
         ports:
             - "${OCTANE_PORT:-8000}:8000"
         env_file: .env
@@ -23,8 +24,56 @@ services:
                 condition: service_healthy
         volumes:
             - app-storage:/app/storage/app
+            - ./storage/app/backups:/app/storage/app/backups
         networks:
             - timelogger
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://localhost:8000/up || exit 1"]
+            interval: 15s
+            timeout: 5s
+            retries: 10
+            start_period: 60s
+        logging:
+            driver: json-file
+            options:
+                max-size: "20m"
+                max-file: "5"
+
+    scheduler:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: production
+        container_name: timelogger_scheduler
+        restart: unless-stopped
+        user: "appuser"
+        entrypoint: ["/usr/local/bin/scheduler.sh"]
+        env_file: .env
+        environment:
+            DB_HOST: postgres
+            DB_PORT: 5432
+            REDIS_CLIENT: predis
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            app:
+                condition: service_healthy
+        volumes:
+            - app-storage:/app/storage/app
+            - ./storage/app/backups:/app/storage/app/backups
+        networks:
+            - timelogger
+        healthcheck:
+            disable: true
+        logging:
+            driver: json-file
+            options:
+                max-size: "10m"
+                max-file: "5"
 
     #   For future use
     #    queue-worker:
@@ -70,6 +119,11 @@ services:
             retries: 5
         networks:
             - timelogger
+        logging:
+            driver: json-file
+            options:
+                max-size: "10m"
+                max-file: "3"
 
     redis:
         image: redis:7.4.2-alpine
@@ -87,6 +141,11 @@ services:
             retries: 5
         networks:
             - timelogger
+        logging:
+            driver: json-file
+            options:
+                max-size: "10m"
+                max-file: "3"
 
 volumes:
     timelogger-pgsql-data:
