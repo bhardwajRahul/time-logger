@@ -67,7 +67,7 @@ export default function TimeEntry({
             )}
           </div>
           {entry.attributes.description ? (
-            <p className="text-sm text-muted-foreground ">
+            <p className="text-sm text-muted-foreground whitespace-pre-line">
               {entry.attributes.description}
             </p>
           ) : (

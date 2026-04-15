@@ -31,6 +31,7 @@ Route::controller(TimeFrameController::class)->group(function () {
 Route::controller(TimeEntryController::class)->group(function () {
     Route::get('/time-entries', 'index')->name('time-entries.index');
     Route::get('/time-entries/{id}', 'show')->name('time-entries.show');
+    Route::post('/time-entries/merge', 'merge')->name('time-entries.merge');
     Route::post('/time-entries', 'store')->name('time-entries.store');
     Route::put('/time-entries/{id}', 'update')->name('time-entries.update');
     Route::delete('/time-entries/{id}', 'destroy')->name('time-entries.destroy');

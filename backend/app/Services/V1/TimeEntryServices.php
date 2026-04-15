@@ -8,6 +8,7 @@ namespace App\Services\V1;
 
 use App\Enums\CacheTagEnum;
 use App\Helpers\C;
+use App\Helpers\Time;
 use App\Http\Filters\Api\V1\Filters\TimeEntryFilter;
 use App\Models\TimeEntry;
 use App\Traits\Api\CacheRequest;
@@ -48,6 +49,41 @@ class TimeEntryServices
         $timeEntry = TimeEntry::create($data);
 
         return $timeEntry;
+    }
+
+    /**
+     * Merge Time Entries into an existing Time Entry
+     */
+    public function mergeTimeEntries(array $data): TimeEntry
+    {
+        $timeEntries = TimeEntry::whereIn('id', $data['ids'])->get();
+        $sorted = $timeEntries->sortBy('created_at');
+
+        $oldest = $sorted->first();
+        $newEntries = $sorted->skip(1)->values();
+
+        $totalExtraSeconds = (int) $newEntries->sum(fn (TimeEntry $entry) => $entry->durationInSeconds);
+
+        $newEndTime = Carbon::parse($oldest->end_time)->addSeconds($totalExtraSeconds);
+
+        $durationLabel = Time::format($totalExtraSeconds);
+
+        $count = $newEntries->count();
+        $entryWord = $count === 1 ? 'entry' : 'entries';
+        $mergeDate = Carbon::now()->toDateTimeString();
+
+        $props = $oldest->additional_properties ?? [];
+        $props['mergeDetails'] = "Merged with {$count} {$entryWord} on {$mergeDate}, extended duration by {$durationLabel}";
+
+        $oldest->update([
+            'end_time' => $newEndTime,
+            'description' => $data['description'] ?? $oldest->description,
+            'additional_properties' => $props,
+        ]);
+
+        TimeEntry::whereIn('id', $newEntries->pluck('id'))->delete();
+
+        return $oldest->fresh();
     }
 
     /**

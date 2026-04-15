@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Filters\Api\V1\Filters\TimeEntryFilter;
-use App\Http\Requests\TimeEntryRequest;
+use App\Http\Requests\TimeEntry\MergeTimeEntryRequest;
+use App\Http\Requests\TimeEntry\TimeEntryRequest;
 use App\Http\Resources\Api\V1\TimeEntryResource;
 use App\Services\V1\TimeEntryServices;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -41,6 +42,21 @@ class TimeEntryController extends ApiController
         try {
 
             $timeEntry = $this->timeEntryServices->createTimeEntry($request->validated());
+
+            return $this->ok('Time Entry Created', new TimeEntryResource($timeEntry), 201);
+        } catch (\Exception $e) {
+
+            return $this->error('Time Entry Creation Error', $e->getMessage(), 500, $e);
+        }
+    }
+
+    /**
+     * Merge Multiple Time Entries.
+     */
+    public function merge(MergeTimeEntryRequest $request)
+    {
+        try {
+            $timeEntry = $this->timeEntryServices->mergeTimeEntries($request->validated());
 
             return $this->ok('Time Entry Created', new TimeEntryResource($timeEntry), 201);
         } catch (\Exception $e) {

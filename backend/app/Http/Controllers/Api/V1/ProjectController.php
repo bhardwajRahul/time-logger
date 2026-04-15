@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Filters\Api\V1\Filters\ProjectFilter;
-use App\Http\Requests\ProjectRequest;
+use App\Http\Requests\Project\ProjectRequest;
 use App\Http\Resources\Api\V1\ProjectResource;
 use App\Services\V1\ProjectServices;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

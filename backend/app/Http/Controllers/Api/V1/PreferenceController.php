@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Filters\Api\V1\Filters\PreferenceFilter;
-use App\Http\Requests\PreferenceRequest;
+use App\Http\Requests\Preferences\PreferenceRequest;
 use App\Http\Resources\Api\V1\PreferenceResource;
 use App\Services\V1\PreferenceServices;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

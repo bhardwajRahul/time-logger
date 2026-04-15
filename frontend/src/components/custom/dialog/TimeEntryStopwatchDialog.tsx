@@ -8,6 +8,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  useCallback,
   useState,
   type ComponentPropsWithoutRef,
   type PropsWithChildren,
@@ -22,8 +23,11 @@ type FormProps = PropsWithChildren &
 
 export function TimeEntryStopwatchDialog({ children, ...props }: FormProps) {
   const [convert, setConvert] = useState(false);
+  const resetOnClose = useCallback((open: boolean) => {
+    if (!open) setTimeout(() => setConvert(false), 200);
+  }, []);
   return (
-    <Dialog>
+    <Dialog onOpenChange={resetOnClose}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>

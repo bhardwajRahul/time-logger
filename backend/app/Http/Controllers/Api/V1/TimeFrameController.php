@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Filters\Api\V1\Filters\TimeFrameFilter;
-use App\Http\Requests\TimeFrameRequest;
+use App\Http\Requests\TimeFrame\TimeFrameRequest;
 use App\Http\Resources\Api\V1\TimeFrameResource;
 use App\Services\V1\TimeFrameServices;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

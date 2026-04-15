@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\TimeFrame;
 
 use App\Enums\TimeFrameStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;

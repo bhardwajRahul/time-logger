@@ -23,6 +23,7 @@ class TimeEntry extends Model
         'end_time',
         'description',
         'billable',
+        'additional_properties',
     ];
 
     protected $casts = [
@@ -30,6 +31,7 @@ class TimeEntry extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'billable' => 'boolean',
+        'additional_properties' => 'array',
     ];
 
     /**

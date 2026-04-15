@@ -1,7 +1,8 @@
 import localforage from 'localforage';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useStopwatch } from 'react-timer-hook';
 const MS_STORE_NAME = 'tl-stopwatch-ms';
+const MS_STORE_PREVIOUS_NAME = 'tl-stopwatch-previous-ms';
 
 const usePersistedStopWatch = ({ interval = 500 } = {}) => {
   const {
@@ -20,17 +21,25 @@ const usePersistedStopWatch = ({ interval = 500 } = {}) => {
     interval,
   });
 
-  // On mount, load the persisted time from localforage and set it as the stopwatch offset
+  const [previousTotalSeconds, setPreviousSeconds] = useState<number | undefined>(undefined);
+
+  // On mount, load the persisted time and previous reference from localforage
   useEffect(() => {
-    localforage
-      .getItem(MS_STORE_NAME)
-      .then((storedMs) => {
-        if (!storedMs) return;
-        const stopwatchOffset = new Date();
-        stopwatchOffset.setSeconds(
-          stopwatchOffset.getSeconds() + Number(storedMs) / 1000,
-        );
-        reset(stopwatchOffset, false);
+    Promise.all([
+      localforage.getItem<number>(MS_STORE_NAME),
+      localforage.getItem<number>(MS_STORE_PREVIOUS_NAME),
+    ])
+      .then(([storedMs, storedPreviousMs]) => {
+        if (storedMs) {
+          const stopwatchOffset = new Date();
+          stopwatchOffset.setSeconds(
+            stopwatchOffset.getSeconds() + storedMs / 1000,
+          );
+          reset(stopwatchOffset, false);
+        }
+        if (storedPreviousMs) {
+          setPreviousSeconds(storedPreviousMs / 1000);
+        }
       })
       .catch((err) => console.error('Failed to load stopwatch:', err));
   }, [reset]);
@@ -50,6 +59,17 @@ const usePersistedStopWatch = ({ interval = 500 } = {}) => {
     [reset],
   );
 
+  // Resets and persists the current value as the "previous" reference before clearing
+  const resetWithReference = useCallback(
+    (offset?: Date | undefined, newAutoStart: boolean | undefined = false) => {
+      localforage.setItem(MS_STORE_PREVIOUS_NAME, totalSeconds * 1000);
+      localforage.removeItem(MS_STORE_NAME);
+      setPreviousSeconds(totalSeconds);
+      reset(offset, newAutoStart);
+    },
+    [reset, totalSeconds],
+  );
+
   return {
     totalSeconds,
     milliseconds,
@@ -61,6 +81,8 @@ const usePersistedStopWatch = ({ interval = 500 } = {}) => {
     start,
     pause,
     reset: hardReset,
+    resetWithReference,
+    previousTotalSeconds,
   };
 };
 
