@@ -91,9 +91,9 @@ RUN mkdir -p storage/logs \
              bootstrap/cache
 
 RUN chown appuser:www-data /app \
-    && chown -R appuser:www-data storage bootstrap/cache \
+    && chown -R appuser:www-data storage bootstrap/cache public \
     && chmod 755 /app \
-    && chmod -R 755 storage bootstrap/cache
+    && chmod -R 755 storage bootstrap/cache public
 
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
