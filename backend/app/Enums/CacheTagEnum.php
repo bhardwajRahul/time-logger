@@ -11,4 +11,5 @@ enum CacheTagEnum: string
     case TIME_FRAME = 'TimeFrame';
     case TIME_ENTRY = 'TimeEntry';
     case MEDIA = 'Media';
+    case TAX = 'Tax';
 }

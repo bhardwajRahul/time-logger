@@ -5,6 +5,7 @@ import type {
   SingleApiRes,
 } from '../global';
 import type { ProjectResource } from './project';
+import type { TaxResource } from './tax';
 import type { TimeEntryResource } from './time-entry';
 
 export type TimeFrameStatus = 'done' | 'in_progress' | 'canceled';
@@ -31,6 +32,7 @@ export interface TimeFrameAttrs {
 export interface TimeFrameInc {
   timeEntries?: TimeEntryResource[];
   project?: ProjectResource;
+  taxes?: TaxResource[];
 }
 
 export interface TimeFrameRel {

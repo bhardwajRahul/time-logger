@@ -6,6 +6,7 @@ namespace App\Services\V1;
 
 use App\Enums\CacheTagEnum;
 use App\Enums\MediaCollectionEnum;
+use App\Enums\TaxTypeEnum;
 use App\Helpers\C;
 use App\Http\Filters\Api\V1\Filters\TimeFrameFilter;
 use App\Models\TimeFrame;
@@ -38,11 +39,17 @@ class TimeFrameServices
     }
 
     /**
-     * Create a new TimeFrame
+     * Create a new TimeFrame.
      */
     public function createTimeframe(array $data): TimeFrame
     {
+        $taxes = $data['taxes'] ?? [];
+        unset($data['taxes']);
         $timeFrame = TimeFrame::create($data);
+
+        if (! empty($taxes)) {
+            $timeFrame->taxes()->sync($taxes);
+        }
 
         return $timeFrame;
     }
@@ -86,7 +93,15 @@ class TimeFrameServices
      */
     public function updateTimeframe(TimeFrame $timeFrame, array $data): TimeFrame
     {
+        $taxes = $data['taxes'] ?? [];
+        unset($data['taxes']);
         $timeFrame->update($data);
+
+        if (! empty($taxes)) {
+            $timeFrame->taxes()->sync($taxes);
+            // sync does not trigger updated() event. Laravel issue(?).
+            \Cache::tags($this->getCacheTags($this->TYPE, $timeFrame->id))->flush();
+        }
 
         return $timeFrame;
     }
@@ -106,11 +121,11 @@ class TimeFrameServices
             'project',
             'user.preferences',
             'media',
+            'taxes',
         ])
             ->findOrFail($timeFrameId);
 
         return $this->generateInvoice($timeFrame)->getFullUrl();
-
     }
 
     /**
@@ -147,6 +162,12 @@ class TimeFrameServices
             ];
         })->toArray();
 
+        $subtotal = $totalAmount;
+        $taxLines = $this->calculateTaxLines($timeFrame, $subtotal);
+        $grandTotal = $subtotal + collect($taxLines)
+            ->where('is_inclusive', false)
+            ->sum('amount');
+
         $pdf = Pdf::loadView('pdf.invoice', [
             'primaryColor' => $additionalProperties['invoicePrimaryColor'] ?? '#E05A2D',
             'invoiceTitle' => $additionalProperties['invoiceTitle'] ?? 'INVOICE',
@@ -159,7 +180,9 @@ class TimeFrameServices
             'hourlyRate' => $hourlyRate,
             'entries' => $entries,
             'totalDuration' => $this->formatDuration($totalSeconds),
-            'totalAmount' => $totalAmount,
+            'subtotal' => $subtotal,
+            'taxLines' => $taxLines,
+            'grandTotal' => $grandTotal,
             'generatedAt' => now()->format('M d, Y \a\t h:i A'),
         ])->setPaper('a4');
 
@@ -175,6 +198,63 @@ class TimeFrameServices
         \Cache::tags([CacheTagEnum::TIME_FRAME->value])->flush();
 
         return $media;
+    }
+
+    /**
+     * Compute invoice totals including tax lines and grand total.
+     *
+     * Taxes must be loaded on the TimeFrame (ordered by pivot sort asc).
+     *
+     * @return array{subtotal: float, taxLines: array<int, array{name: string, amount: float, is_inclusive: bool}>, grandTotal: float}
+     */
+    public function computeTaxes(TimeFrame $timeFrame, float $subtotal): array
+    {
+        $taxLines = $this->calculateTaxLines($timeFrame, $subtotal);
+        $grandTotal = $subtotal + collect($taxLines)
+            ->where('is_inclusive', false)
+            ->sum('amount');
+
+        return compact('subtotal', 'taxLines', 'grandTotal');
+    }
+
+    /**
+     * Calculate tax line items for an invoice.
+     *
+     * Taxes must be loaded on the TimeFrame (ordered by pivot sort asc).
+     *
+     * @return array<int, array{name: string, amount: float, is_inclusive: bool}>
+     */
+    private function calculateTaxLines(TimeFrame $timeFrame, float $subtotal): array
+    {
+        $taxLines = [];
+        $runningTotal = $subtotal;
+
+        foreach ($timeFrame->taxes as $tax) {
+            $base = $tax->is_compound ? $runningTotal : $subtotal;
+
+            if ($tax->type === TaxTypeEnum::Percentage) {
+                $taxAmount = $tax->is_inclusive
+                    ? round($base * $tax->rate / (1 + $tax->rate), 2)
+                    : round($base * $tax->rate, 2);
+            } else {
+                $taxAmount = (float) $tax->rate;
+            }
+
+            $taxLines[] = [
+                'name' => $tax->name,
+                'rate' => $tax->rate,
+                'type' => $tax->type,
+                'amount' => $taxAmount,
+                'is_inclusive' => $tax->is_inclusive,
+                'is_compound' => $tax->is_compound,
+            ];
+
+            if (! $tax->is_inclusive) {
+                $runningTotal += $taxAmount;
+            }
+        }
+
+        return $taxLines;
     }
 
     /**

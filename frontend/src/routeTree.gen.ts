@@ -11,7 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TaxesIndexRouteImport } from './routes/taxes/index'
 import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
+import { Route as HelpIndexRouteImport } from './routes/help/index'
+import { Route as TaxesTaxIdIndexRouteImport } from './routes/taxes/$taxId/index'
 import { Route as ProjectsProjectIdIndexRouteImport } from './routes/projects/$projectId/index'
 import { Route as ProjectsProjectIdTimeFrameIdRouteImport } from './routes/projects/$projectId/$timeFrameId'
 
@@ -25,9 +28,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TaxesIndexRoute = TaxesIndexRouteImport.update({
+  id: '/taxes/',
+  path: '/taxes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpIndexRoute = HelpIndexRouteImport.update({
+  id: '/help/',
+  path: '/help/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TaxesTaxIdIndexRoute = TaxesTaxIdIndexRouteImport.update({
+  id: '/taxes/$taxId/',
+  path: '/taxes/$taxId/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectsProjectIdIndexRoute = ProjectsProjectIdIndexRouteImport.update({
@@ -45,55 +63,76 @@ const ProjectsProjectIdTimeFrameIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/preferences': typeof PreferencesRoute
+  '/help/': typeof HelpIndexRoute
   '/projects/': typeof ProjectsIndexRoute
+  '/taxes/': typeof TaxesIndexRoute
   '/projects/$projectId/$timeFrameId': typeof ProjectsProjectIdTimeFrameIdRoute
   '/projects/$projectId/': typeof ProjectsProjectIdIndexRoute
+  '/taxes/$taxId/': typeof TaxesTaxIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/preferences': typeof PreferencesRoute
+  '/help': typeof HelpIndexRoute
   '/projects': typeof ProjectsIndexRoute
+  '/taxes': typeof TaxesIndexRoute
   '/projects/$projectId/$timeFrameId': typeof ProjectsProjectIdTimeFrameIdRoute
   '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
+  '/taxes/$taxId': typeof TaxesTaxIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/preferences': typeof PreferencesRoute
+  '/help/': typeof HelpIndexRoute
   '/projects/': typeof ProjectsIndexRoute
+  '/taxes/': typeof TaxesIndexRoute
   '/projects/$projectId/$timeFrameId': typeof ProjectsProjectIdTimeFrameIdRoute
   '/projects/$projectId/': typeof ProjectsProjectIdIndexRoute
+  '/taxes/$taxId/': typeof TaxesTaxIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/preferences'
+    | '/help/'
     | '/projects/'
+    | '/taxes/'
     | '/projects/$projectId/$timeFrameId'
     | '/projects/$projectId/'
+    | '/taxes/$taxId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/preferences'
+    | '/help'
     | '/projects'
+    | '/taxes'
     | '/projects/$projectId/$timeFrameId'
     | '/projects/$projectId'
+    | '/taxes/$taxId'
   id:
     | '__root__'
     | '/'
     | '/preferences'
+    | '/help/'
     | '/projects/'
+    | '/taxes/'
     | '/projects/$projectId/$timeFrameId'
     | '/projects/$projectId/'
+    | '/taxes/$taxId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PreferencesRoute: typeof PreferencesRoute
+  HelpIndexRoute: typeof HelpIndexRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
+  TaxesIndexRoute: typeof TaxesIndexRoute
   ProjectsProjectIdTimeFrameIdRoute: typeof ProjectsProjectIdTimeFrameIdRoute
   ProjectsProjectIdIndexRoute: typeof ProjectsProjectIdIndexRoute
+  TaxesTaxIdIndexRoute: typeof TaxesTaxIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -112,11 +151,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/taxes/': {
+      id: '/taxes/'
+      path: '/taxes'
+      fullPath: '/taxes/'
+      preLoaderRoute: typeof TaxesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/projects/': {
       id: '/projects/'
       path: '/projects'
       fullPath: '/projects/'
       preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help/': {
+      id: '/help/'
+      path: '/help'
+      fullPath: '/help/'
+      preLoaderRoute: typeof HelpIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/taxes/$taxId/': {
+      id: '/taxes/$taxId/'
+      path: '/taxes/$taxId'
+      fullPath: '/taxes/$taxId/'
+      preLoaderRoute: typeof TaxesTaxIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/projects/$projectId/': {
@@ -139,9 +199,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PreferencesRoute: PreferencesRoute,
+  HelpIndexRoute: HelpIndexRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
+  TaxesIndexRoute: TaxesIndexRoute,
   ProjectsProjectIdTimeFrameIdRoute: ProjectsProjectIdTimeFrameIdRoute,
   ProjectsProjectIdIndexRoute: ProjectsProjectIdIndexRoute,
+  TaxesTaxIdIndexRoute: TaxesTaxIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

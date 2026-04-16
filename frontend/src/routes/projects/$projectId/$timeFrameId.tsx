@@ -9,7 +9,7 @@ export const Route = createFileRoute('/projects/$projectId/$timeFrameId')({
   loader: async ({ params: { timeFrameId } }) => {
     const timeFrame = await getTimeFrame({
       identifier: timeFrameId,
-      include: 'timeEntries,project:id;name;slug,media',
+      include: 'timeEntries,project:id;name;slug,media,taxes',
       add: 'totalBillableSeconds',
     });
     return { timeFrame };

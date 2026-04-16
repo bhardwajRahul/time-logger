@@ -13,7 +13,6 @@ interface GetInvoiceProps {
 
 export default function GetInvoice({ timeFrame }: GetInvoiceProps) {
   const router = useRouter();
-  console.log(timeFrame);
   const downloadInvoice = useCallback(
     async (timeFrame: TimeFrameResource) => {
       await getTimeFrameInvoice({
@@ -44,7 +43,7 @@ export default function GetInvoice({ timeFrame }: GetInvoiceProps) {
       <ConfirmationDialog
         title="An existing invoice was found for this time frame"
         description="You previously generated an invoice for this time frame that you can download it from the summary card.
-        
+
         Proceeding will erase the existing invoice and generate a new one. Do you want to proceed anyways?"
         ctaText="Generate New Invoice"
         ctaVariant="default"
@@ -52,6 +51,10 @@ export default function GetInvoice({ timeFrame }: GetInvoiceProps) {
         onConfirm={async () => {
           await downloadInvoice(timeFrame);
         }}
+        secondaryText="Download Existing Invoice"
+        onSecondaryAction={() =>
+          window.open(timeFrame.attributes.invoiceUrl!, '_blank')
+        }
       >
         <Button variant="outline">
           <IconInvoice />

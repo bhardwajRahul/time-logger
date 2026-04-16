@@ -14,7 +14,7 @@ export const PREFERNCE_SCHEMA = z.object({
     z.string().regex(/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/, 'Invalid HEX color code'),
     z.literal(''),
     z.null(),
-  ]),
+  ]).optional(),
 });
 
 export type PreferenceForm = z.infer<typeof PREFERNCE_SCHEMA>;

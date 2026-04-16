@@ -31,4 +31,5 @@ export const SWR_CACHE_KEYS = {
   PREFERENCES: 'preferences',
   TIME_FRAMES: 'timeFrames',
   TIME_ENTRIES: 'timeEntries',
+  TAXES: 'taxes',
 };

@@ -57,6 +57,9 @@ class TimeFrameResource extends JsonResource
                 'project' => $this->whenLoaded('project', function () {
                     return new ProjectResource($this->project);
                 }),
+                'taxes' => $this->whenLoaded('taxes', function () {
+                    return TaxResource::collection($this->taxes);
+                }),
             ],
         ];
     }

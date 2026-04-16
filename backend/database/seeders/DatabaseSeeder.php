@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use Database\Seeders\SeederClasses\PreferenceSeeder;
+use Database\Seeders\SeederClasses\ProjectSeeder;
+use Database\Seeders\SeederClasses\TaxSeeder;
 use Database\Seeders\SeederClasses\UserSeeder;
 use Illuminate\Database\Seeder;
 
@@ -16,6 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             PreferenceSeeder::class,
+            TaxSeeder::class,
+            ProjectSeeder::class,
         ]);
     }
 }

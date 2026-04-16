@@ -8,6 +8,7 @@ use App\Http\Requests\TimeFrame\TimeFrameRequest;
 use App\Http\Resources\Api\V1\TimeFrameResource;
 use App\Services\V1\TimeFrameServices;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class TimeFrameController extends ApiController
@@ -40,7 +41,6 @@ class TimeFrameController extends ApiController
     public function store(TimeFrameRequest $request)
     {
         try {
-
             $timeFrame = $this->timeFrameServices->createTimeframe($request->validated());
 
             return $this->ok('TimeFrame Created', new TimeFrameResource($timeFrame), 201);
@@ -82,7 +82,7 @@ class TimeFrameController extends ApiController
         } catch (ModelNotFoundException $e) {
             return $this->error('Time Frame not found', null, 404);
         } catch (\Exception $e) {
-            return $this->error('Time Frame Invoice Error', null, 500, $e);
+            return $this->error('Time Frame Invoice Error', $e->getMessage(), 500, $e);
         }
     }
 
@@ -94,7 +94,7 @@ class TimeFrameController extends ApiController
         try {
             // We're inserting the filter here to load the related relations for the returned TimeFrameResource().
             // This is necessary to ensure that the totalBillableSeconds attribute is included in the response after the update.
-            $filters = new TimeFrameFilter(new \Illuminate\Http\Request([
+            $filters = new TimeFrameFilter(new Request([
                 'include' => 'timeEntries,project:id;name;slug,media',
                 'add' => 'totalBillableSeconds',
             ]));

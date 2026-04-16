@@ -20,6 +20,8 @@ type ConfirmationDialogProps = PropsWithChildren & {
   description?: string;
   successToastMessage?: string;
   onConfirm: () => Promise<void>;
+  secondaryText?: string;
+  onSecondaryAction?: () => void;
 };
 
 export function ConfirmationDialog({
@@ -30,6 +32,8 @@ export function ConfirmationDialog({
   onConfirm,
   successToastMessage,
   cancelText = 'Cancel',
+  secondaryText,
+  onSecondaryAction,
   children,
 }: ConfirmationDialogProps) {
   const [open, setOpen] = useState(false);
@@ -48,6 +52,11 @@ export function ConfirmationDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{cancelText}</AlertDialogCancel>
+          {secondaryText && onSecondaryAction && (
+            <AlertDialogCancel onClick={onSecondaryAction}>
+              {secondaryText}
+            </AlertDialogCancel>
+          )}
           <AlertDialogAction
             variant={ctaVariant}
             onClick={async (e) => {

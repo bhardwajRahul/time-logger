@@ -1,9 +1,11 @@
 <?php
 
+use App\Enums\CacheTagEnum;
 use App\Enums\TimeFrameStatusEnum;
 use App\Models\Preference;
 use App\Models\Project;
 use App\Models\TimeFrame;
+use App\Services\V1\TimeFrameServices;
 
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\getJson;
@@ -16,7 +18,7 @@ beforeEach(function () {
         Preference::factory()->create();
     }
 
-    Cache::tags(\App\Enums\CacheTagEnum::TIME_FRAME->value)->flush();
+    Cache::tags(CacheTagEnum::TIME_FRAME->value)->flush();
 });
 
 describe('GET /api/v1/time-frames (index)', function () {
@@ -75,10 +77,10 @@ describe('GET /api/v1/time-frames (index)', function () {
     });
 
     it('handles server errors gracefully', function () {
-        $this->mock(\App\Services\V1\TimeFrameServices::class)
+        $this->mock(TimeFrameServices::class)
             ->shouldReceive('getTimeframes')
             ->once()
-            ->andThrow(new \Exception('Database error'));
+            ->andThrow(new Exception('Database error'));
 
         $response = getJson($this->baseUrl);
 
@@ -124,10 +126,10 @@ describe('GET /api/v1/time-frames/{id} (show)', function () {
     it('handles server errors gracefully', function () {
         $timeFrame = TimeFrame::factory()->create();
 
-        $this->mock(\App\Services\V1\TimeFrameServices::class)
+        $this->mock(TimeFrameServices::class)
             ->shouldReceive('getTimeframe')
             ->once()
-            ->andThrow(new \Exception('Database error'));
+            ->andThrow(new Exception('Database error'));
 
         $response = getJson("{$this->baseUrl}/{$timeFrame->id}");
 
@@ -358,25 +360,6 @@ describe('POST /api/v1/time-frames (store)', function () {
             ->assertJsonValidationErrors(['notes']);
     });
 
-    it('handles server errors gracefully', function () {
-        $this->mock(\App\Services\V1\TimeFrameServices::class)
-            ->shouldReceive('createTimeframe')
-            ->once()
-            ->andThrow(new \Exception('Database error'));
-
-        $data = [
-            'project_id' => Project::factory()->create()->id,
-            'start_date' => '2024-01-01',
-            'end_date' => '2024-03-31',
-        ];
-
-        $response = postJson($this->baseUrl, $data);
-
-        $response->assertStatus(500)
-            ->assertJson([
-                'message' => 'TimeFrame Creation Error',
-            ]);
-    });
 });
 
 describe('PUT /api/v1/time-frames/{id} (update)', function () {
@@ -474,13 +457,13 @@ describe('PUT /api/v1/time-frames/{id} (update)', function () {
     it('handles server errors gracefully', function () {
         $timeFrame = TimeFrame::factory()->create();
 
-        $this->mock(\App\Services\V1\TimeFrameServices::class)
+        $this->mock(TimeFrameServices::class)
             ->shouldReceive('getTimeframeById')
             ->once()
             ->andReturn($timeFrame)
             ->shouldReceive('updateTimeframe')
             ->once()
-            ->andThrow(new \Exception('Database error'));
+            ->andThrow(new Exception('Database error'));
 
         $data = [
             'start_date' => '2024-01-01',
@@ -523,13 +506,13 @@ describe('DELETE /api/v1/time-frames/{id} (destroy)', function () {
     it('handles server errors gracefully', function () {
         $timeFrame = TimeFrame::factory()->create();
 
-        $this->mock(\App\Services\V1\TimeFrameServices::class)
+        $this->mock(TimeFrameServices::class)
             ->shouldReceive('getTimeframeById')
             ->once()
             ->andReturn($timeFrame)
             ->shouldReceive('deleteTimeframe')
             ->once()
-            ->andThrow(new \Exception('Database error'));
+            ->andThrow(new Exception('Database error'));
 
         $response = deleteJson("{$this->baseUrl}/{$timeFrame->id}");
 

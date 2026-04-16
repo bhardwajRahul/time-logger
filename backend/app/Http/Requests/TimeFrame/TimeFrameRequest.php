@@ -3,6 +3,7 @@
 namespace App\Http\Requests\TimeFrame;
 
 use App\Enums\TimeFrameStatusEnum;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -19,7 +20,7 @@ class TimeFrameRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -35,6 +36,9 @@ class TimeFrameRequest extends FormRequest
 
             'hourly_rate' => ['required', 'numeric'],
             'currency' => ['required', 'string', 'size:3'],
+
+            'taxes' => ['nullable', 'array'],
+            'taxes.*' => ['string', 'exists:taxes,id'],
         ];
     }
 }

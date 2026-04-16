@@ -1,19 +1,20 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { addWeeks, format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-
 import type { TimeFrameResource } from '@/interfaces/entity/time-frame';
 import type { GenericErrorResponse } from '@/interfaces/global';
+import { getTaxes } from '@/lib/data-access/tax';
 import { createTimeFrame, updateTimeFrame } from '@/lib/data-access/time-frame';
 import {
   TIMEFRAME_SCHEMA,
   type TimeFrameFormType,
 } from '@/lib/schema/time-frame';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { addWeeks, format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -42,10 +43,11 @@ import { TIMEFRAME_STATUSES } from '@/lib/data-access/form-constants';
 import { usePreferences } from '@/providers/PreferencesProvider';
 import { cn } from '@/utils/cn-utils';
 import { parseError } from '@/utils/error-handling';
-import { useNavigate } from '@tanstack/react-router';
+import { formatTaxRate } from '@/utils/tax';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useQueryState } from 'nuqs';
 import { toast } from 'sonner';
-import { useSWRConfig } from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import FormErrors from './FormErrors';
 
 interface TimeFrameFormProps {
@@ -71,6 +73,11 @@ export default function TimeFrameForm({
     defaultValue: DEFAULT_API_PAGE_SIZE.toString(),
   });
   const { preferences } = usePreferences();
+
+  const { data: taxesData } = useSWR([SWR_CACHE_KEYS.TAXES, 'all'], () =>
+    getTaxes({ sort: 'sort', pageSize: 100 }),
+  );
+
   const form = useForm<TimeFrameFormType>({
     resolver: zodResolver(TIMEFRAME_SCHEMA),
     defaultValues: {
@@ -82,7 +89,6 @@ export default function TimeFrameForm({
       end_date: timeFrame?.attributes.endDate
         ? new Date(timeFrame.attributes.endDate)
         : undefined,
-      // : undefined,
       status: timeFrame?.attributes.status ?? 'in_progress',
       notes: timeFrame?.attributes.notes ?? '',
       currency:
@@ -93,8 +99,23 @@ export default function TimeFrameForm({
         timeFrame?.attributes.hourlyRate ??
         preferences?.attributes.hourlyRate ??
         undefined,
+      taxes:
+        mode === 'edit'
+          ? (timeFrame?.includes?.taxes?.map((t) => t.id) ?? [])
+          : [],
     },
   });
+
+  const createDefaultsApplied = useRef(false);
+
+  useEffect(() => {
+    if (mode !== 'create' || !taxesData || createDefaultsApplied.current) return;
+    createDefaultsApplied.current = true;
+    const defaults = taxesData.data
+      .filter((t) => t.attributes.isEnabledByDefault)
+      .map((t) => t.id);
+    form.setValue('taxes', defaults);
+  }, [taxesData, mode, form]);
 
   async function onSubmit(values: TimeFrameFormType) {
     setServerErrors({});
@@ -396,6 +417,72 @@ export default function TimeFrameForm({
             You can override your default rate for this time frame by entering a
             different value here.
           </p>
+        </div>
+
+        <div className="py-4 px-2 bg-accent rounded-lg space-y-3">
+          <div>
+            <p className="text-sm font-medium leading-none">Taxes</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Select taxes to apply to this time frame when generating invoices.
+            </p>
+          </div>
+          {!taxesData ? (
+            <p className="text-sm text-muted-foreground">Loading taxes…</p>
+          ) : taxesData.data.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No taxes found.{' '}
+              <Link
+                to="/taxes"
+                className="underline underline-offset-4 hover:text-foreground"
+              >
+                Create one here
+              </Link>
+              .
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {(() => {
+                const taxIds = form.watch('taxes') ?? [];
+                return taxesData.data.map((tax) => (
+                  <div key={tax.id} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`tax-${tax.id}`}
+                      checked={taxIds.includes(tax.id)}
+                      onCheckedChange={(checked) => {
+                        const cur = form.getValues('taxes') ?? [];
+                        form.setValue(
+                          'taxes',
+                          checked
+                            ? [...cur, tax.id]
+                            : cur.filter((id) => id !== tax.id),
+                          { shouldValidate: true },
+                        );
+                      }}
+                    />
+                    <label
+                      htmlFor={`tax-${tax.id}`}
+                      className="text-sm cursor-pointer"
+                    >
+                      {tax.attributes.name}{' '}
+                      <span className="text-muted-foreground">
+                        (
+                        {formatTaxRate(
+                          tax.attributes.rate,
+                          tax.attributes.type,
+                        )}
+                        )
+                      </span>
+                    </label>
+                  </div>
+                ));
+              })()}
+            </div>
+          )}
+          {serverErrors.taxes && (
+            <p className="text-destructive text-sm">
+              {serverErrors.taxes.join(', ')}
+            </p>
+          )}
         </div>
 
         <FormField

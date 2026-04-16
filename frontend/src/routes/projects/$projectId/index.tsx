@@ -50,7 +50,7 @@ function RouteComponent() {
   const fetcher = () =>
     getTimeFrames({
       projectId: project.id,
-      include: 'timeEntries',
+      include: 'timeEntries,taxes',
       add: 'totalBillableSeconds',
       sort: '-startDate',
       status: tab === 'all' ? undefined : (tab as TimeFrameStatus),

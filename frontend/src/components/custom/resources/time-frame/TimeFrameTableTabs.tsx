@@ -24,7 +24,7 @@ export default function TimeFrameTableTabs() {
       defaultValue={tab || 'all'}
       className="w-full flex-col justify-start gap-6"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-end">
         <Label htmlFor="view-selector" className="sr-only">
           View
         </Label>

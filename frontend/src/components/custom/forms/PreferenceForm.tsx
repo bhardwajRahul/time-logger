@@ -10,11 +10,11 @@ import {
   type PreferenceForm as PreferenceFormType,
 } from '@/lib/schema/preference';
 
+import InputColor from '@/components/custom/generic/InputColor';
 import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -31,6 +31,7 @@ import {
 import { SWR_CACHE_KEYS } from '@/config';
 import { DAYS_OF_WEEK } from '@/lib/data-access/form-constants';
 import { parseError } from '@/utils/error-handling';
+import { Link } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useSWRConfig } from 'swr';
 import FormErrors from './FormErrors';
@@ -90,6 +91,16 @@ export default function PreferenceForm({
             You can set your system preferences here. These preferences will be
             used as defaults when creating new time frames and generating
             invoices.
+          </p>
+          <p className="text-muted-foreground text-sm">
+            To manage your tax rates,{' '}
+            <Link
+              to="/taxes"
+              className="underline underline-offset-4 hover:text-foreground"
+            >
+              visit the Taxes page
+            </Link>
+            .
           </p>
         </div>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
@@ -248,27 +259,22 @@ export default function PreferenceForm({
             name="invoicePrimaryColor"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Invoice Primary Color (optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="#000000"
-                    {...field}
-                    value={field.value ?? ''}
-                  />
-                </FormControl>
-                <div className="flex-inline items-center text-muted-foreground text-sm">
+                <InputColor
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  label="Invoice Primary Color (optional)"
+                  placeholder="#E05A2D"
+                  error={serverErrors.invoicePrimaryColor?.join(', ')}
+                  className=""
+                />
+                <div className="flex-inline items-center text-muted-foreground text-sm mt-1">
                   Enter a hex code for the primary color used in your invoices.
                   This will override the default color scheme{' '}
                   <div className="w-3 h-3 bg-primary inline-block me-1 rounded" />
                   <span className="text-primary">(#E05A2D)</span>.
                 </div>
-                <FormDescription></FormDescription>
                 <FormMessage />
-                {serverErrors.invoicePrimaryColor && (
-                  <p className="text-destructive text-sm">
-                    {serverErrors.invoicePrimaryColor.join(', ')}
-                  </p>
-                )}
               </FormItem>
             )}
           />

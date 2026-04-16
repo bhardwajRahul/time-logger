@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -46,6 +47,17 @@ class TimeFrame extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection(MediaCollectionEnum::TIME_FRAME_INVOICE->value)->singleFile();
+    }
+
+    /**
+     * Get the taxes for the timeframe, ordered by pivot sort ascending
+     */
+    public function taxes(): BelongsToMany
+    {
+        return $this->belongsToMany(Tax::class)
+            ->using(TimeFrameTax::class)
+            ->withTimestamps()
+            ->orderBy('taxes.sort', 'asc');
     }
 
     /**

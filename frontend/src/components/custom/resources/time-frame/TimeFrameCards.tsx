@@ -1,4 +1,5 @@
 import StatusBadge from '@/components/custom/generic/StatusBadge';
+import TaxesAppliedBadge from '@/components/custom/resources/time-frame/TaxesAppliedBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { TimeFrameResource } from '@/interfaces/entity/time-frame';
@@ -77,7 +78,12 @@ export default function TimeFrameCards({ timeFrame }: TimeFrameCardsProps) {
               <div className="text-lg font-semibold mt-0.5">
                 {timeFrame.attributes.totalRecordedDurationInMinutes
                   ? (() => {
-                      const d = dayjs.duration(Number(timeFrame.attributes.totalRecordedDurationInMinutes), 'minutes');
+                      const d = dayjs.duration(
+                        Number(
+                          timeFrame.attributes.totalRecordedDurationInMinutes,
+                        ),
+                        'minutes',
+                      );
                       return `${Math.floor(d.asHours())} hrs ${d.minutes()} min`;
                     })()
                   : '-'}
@@ -107,7 +113,7 @@ export default function TimeFrameCards({ timeFrame }: TimeFrameCardsProps) {
               <IconHash className="size-4" />
               Summary
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <div className="text-xs text-muted-foreground">Status</div>
                 <div className="mt-1">
@@ -117,17 +123,28 @@ export default function TimeFrameCards({ timeFrame }: TimeFrameCardsProps) {
               <div>
                 <div className="text-xs text-muted-foreground">Entries</div>
                 <div className="text-sm font-semibold mt-0.5">
-                  {timeFrame.attributes.entriesCount}
+                  {timeFrame.attributes.entriesCount ?? 0}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-xs text-muted-foreground">Taxes</div>
+                <div className="mt-1">
+                  {timeFrame.includes?.taxes && timeFrame.includes.taxes.length > 0 ? (
+                    <TaxesAppliedBadge taxes={timeFrame.includes.taxes} />
+                  ) : (
+                    <span className="text-sm font-semibold">-</span>
+                  )}
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-2">
                 <div className="text-xs text-muted-foreground">
                   Total Billable{' '}
                   {timeFrame.attributes.status === 'in_progress'
-                    ? '(so far)'
-                    : ''}
+                    ? '(so far - before taxes)'
+                    : '(before taxes)'}
                 </div>
                 <div className="text-lg font-semibold mt-0.5 text-green-600 dark:text-green-400">
                   {timeFrame.attributes.totalBillable ?? '-'}

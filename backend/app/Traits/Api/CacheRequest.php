@@ -11,6 +11,7 @@ trait CacheRequest
 {
     public const GLOBAL_TAGS = [
         CacheTagEnum::PREFERENCE->value,
+        CacheTagEnum::TAX->value,
     ];
 
     public const CONTENT_TAGS = [

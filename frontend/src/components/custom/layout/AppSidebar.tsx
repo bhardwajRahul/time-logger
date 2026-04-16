@@ -1,6 +1,8 @@
 import {
   IconBrandGithub,
   IconCalendar,
+  IconHelp,
+  IconReceipt2,
   IconSettings,
 } from '@tabler/icons-react';
 import * as React from 'react';
@@ -27,6 +29,11 @@ const data = {
       altPathnames: ['/projects'],
     },
     {
+      title: 'Taxes',
+      url: '/taxes',
+      icon: IconReceipt2,
+    },
+    {
       title: 'Preferences',
       url: '/preferences',
       icon: IconSettings,
@@ -34,6 +41,11 @@ const data = {
   ],
 
   navSecondary: [
+    {
+      title: 'Help',
+      url: '/help',
+      icon: IconHelp,
+    },
     {
       title: 'GitHub',
       url: 'https://github.com/ahmed-fawzy99/time-logger',

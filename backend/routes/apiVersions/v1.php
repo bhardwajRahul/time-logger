@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\PreferenceController;
 use App\Http\Controllers\Api\V1\ProjectController;
+use App\Http\Controllers\Api\V1\TaxController;
 use App\Http\Controllers\Api\V1\TimeEntryController;
 use App\Http\Controllers\Api\V1\TimeFrameController;
 
@@ -26,6 +27,15 @@ Route::controller(TimeFrameController::class)->group(function () {
     Route::post('/time-frames', 'store')->name('time-frames.store');
     Route::put('/time-frames/{id}', 'update')->name('time-frames.update');
     Route::delete('/time-frames/{id}', 'destroy')->name('time-frames.destroy');
+});
+
+Route::controller(TaxController::class)->group(function () {
+    Route::get('/taxes', 'index')->name('taxes.index');
+    Route::get('/taxes/{id}', 'show')->name('taxes.show');
+    Route::post('/taxes', 'store')->name('taxes.store');
+    Route::post('/taxes/rearrange', 'rearrange')->name('taxes.rearrange');
+    Route::put('/taxes/{id}', 'update')->name('taxes.update');
+    Route::delete('/taxes/{id}', 'destroy')->name('taxes.destroy');
 });
 
 Route::controller(TimeEntryController::class)->group(function () {

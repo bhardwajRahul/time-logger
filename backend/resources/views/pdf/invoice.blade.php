@@ -169,8 +169,13 @@
         }
 
         .totals-table {
-            width: 320px;
+            width: 50%;
             margin-left: auto;
+        }
+
+        .tax-compound-badge {
+            font-size: 8px;
+            color: #9A958D;
         }
 
         .totals-table thead th:first-child {
@@ -288,10 +293,33 @@
             <td>Total Duration</td>
             <td>{{ $totalDuration }}</td>
         </tr>
-        <tr>
-            <td>Total Payable ({{ $totalDuration }} &times; {{ $currency }} {{ number_format($hourlyRate, 2) }})</td>
-            <td>{{ $currency }} {{ number_format($totalAmount, 2) }}</td>
-        </tr>
+        @if(count($taxLines) > 0)
+            <tr>
+                <td>Subtotal ({{ $totalDuration }} &times; {{ $currency }} {{ number_format($hourlyRate, 2) }})</td>
+                <td>{{ $currency }} {{ number_format($subtotal, 2) }}</td>
+            </tr>
+            @foreach($taxLines as $tax)
+                <tr>
+                    <td>
+                        {{ $tax['name'] }} (@if($tax['type']->value === 'percentage'){{ ($tax['rate'] * 100) }}%@else{{ $currency }} {{ number_format($tax['rate'], 2) }}@endif){{ $tax['is_inclusive'] ? ' (included)' : '' }}
+                        @if($tax['is_compound'])
+                            <span class="tax-compound-badge">(compound)</span>
+                        @endif
+                    </td>
+                    <td>{{ $currency }} {{ number_format($tax['amount'], 2) }}</td>
+                </tr>
+            @endforeach
+            <tr>
+                <td><strong>Total Payable</strong></td>
+                <td><strong>{{ $currency }} {{ number_format($grandTotal, 2) }}</strong></td>
+            </tr>
+        @else
+            <tr>
+                <td>Total Payable ({{ $totalDuration }} &times; {{ $currency }} {{ number_format($hourlyRate, 2) }})
+                </td>
+                <td>{{ $currency }} {{ number_format($grandTotal, 2) }}</td>
+            </tr>
+        @endif
         </tbody>
     </table>
 </div>

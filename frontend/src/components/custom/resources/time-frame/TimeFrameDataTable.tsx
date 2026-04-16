@@ -194,6 +194,7 @@ type TableProbs = Omit<
   ComponentPropsWithoutRef<typeof GenericTable<TimeFrameResource>>,
   'columns' | 'TabsNode'
 >;
+
 export function TimeFrameDataTable({ ...props }: TableProbs) {
   return (
     <GenericTable

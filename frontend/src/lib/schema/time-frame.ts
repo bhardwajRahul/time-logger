@@ -11,6 +11,8 @@ export const TIMEFRAME_SCHEMA = z
 
     currency: z.string().min(1, 'Currency is required'),
     hourly_rate: z.number().positive('Hourly rate must be positive'),
+
+    taxes: z.array(z.string()).optional(),
   })
   .refine((data) => data.end_date >= data.start_date, {
     message: 'End date must be after or equal to start date',
@@ -22,8 +24,9 @@ export type TimeFrameFormType = z.infer<typeof TIMEFRAME_SCHEMA>;
 // API payload type with string dates
 export type TimeFrameApiPayload = Omit<
   TimeFrameFormType,
-  'start_date' | 'end_date'
+  'start_date' | 'end_date' | 'taxes'
 > & {
   start_date: string;
   end_date: string;
+  taxes?: string[];
 };
