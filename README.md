@@ -158,4 +158,4 @@ If you find this project useful and want to support its development, you can sta
 
 # License
 
-This project is licensed under the GPLv3 License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the GPLv3 License. See the [LICENSE](LICENSE.md) file for details.
