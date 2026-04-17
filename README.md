@@ -112,10 +112,10 @@ Sample PDF Invoice Link: https://pub-2d4798b44c2c47d1adecc6c62bf47f38.r2.dev/git
 
 Backups are handled automatically by a dedicated `scheduler` Docker container running Laravel's task scheduler. Two commands run nightly:
 
-| Time (UTC) | Command         | What it does                                              |
-|------------|-----------------|-----------------------------------------------------------|
-| 22:00      | `backup:clean`  | Deletes old backups according to the retention policy     |
-| 22:30      | `backup:run`    | Creates a new backup (database dump + application files)  |
+| Time (UTC) | Command        | What it does                                             |
+| ---------- | -------------- | -------------------------------------------------------- |
+| 22:00      | `backup:clean` | Deletes old backups according to the retention policy    |
+| 22:30      | `backup:run`   | Creates a new backup (database dump + application files) |
 
 You can change the default timezone in `backend/config/app.php` under the `timezone` field. You can also change the the time at which they run from `backend/routes/console.php`.
 
@@ -136,7 +136,7 @@ docker compose -f backend/compose.yaml exec app php artisan backup:run
   - This may include creating a roles (admins, managers and users) with a filament dashboard, and allow a hierarchy of users management, but for now the focus is on the single user experience.
 - [ ] Add UI for restoring deleted resources
   - The backend already supports soft deletes for projects, time frames, and time entries, but the frontend currently does not have a UI for restoring deleted resources. This will require changes to the frontend to allow users to view and restore deleted resources.
-- [ ] Add support for more advanced billing features and criteria.
+- [x] Add support for more advanced billing features and criteria.
 - [ ] Add support for localization and multiple languages
 - [ ] Add support for exporting data in different formats (e.g. CSV, PDF)
 - [ ] Add support for more advanced invoice customization
@@ -144,7 +144,7 @@ docker compose -f backend/compose.yaml exec app php artisan backup:run
 Fancy stuff that can be added in the future:
 
 - [ ] Add analytics and reporting features to help users track their time and productivity
-- [ ] Add support for integrating with calendar applications (e.g. Google Calendar) to automatically log time based on calendar events
+- [ ] Add support for integrating with issue tracking apps (e.g. Linear, GitHub Issues) and calendar applications (e.g. Google Calendar).
 - [ ] Add support for integrating with project management tools (e.g. Trello, Asana) to automatically log time based on tasks and projects
 - [ ] Grow to compete Clockify and Toggl.
 
