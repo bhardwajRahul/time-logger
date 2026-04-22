@@ -1,6 +1,8 @@
-# TIME LOGGER
+# LogForMe Community Edition
 
 Self-hosted app for logging your work hours and generating invoices based on those hours. Built with React and Laravel, and designed to be simple, intuitive, and efficient for freelancers and small businesses.
+
+> The hosted version with more features is available at [logforme.com](https://logforme.com).
 
 # Features
 
@@ -22,8 +24,8 @@ Tech Stack:
 Clone the repository:
 
 ```bash
-git clone https://github.com/ahmed-fawzy99/time-logger.git
-cd time-logger
+git clone https://github.com/ahmed-fawzy99/logforme-ce.git
+cd logforme-ce
 
 cp backend/.env.example backend/.env
 ```
@@ -55,7 +57,7 @@ docker compose -f backend/compose.yaml exec -it app php artisan db:seed --class=
 docker compose -f backend/compose.yaml exec -it app php artisan migrate:fresh --seed --force
 ```
 
-Access the application by navigating to http://localhost:3999 in your web browser. You should see the Time Logger application running.
+Access the application by navigating to http://localhost:3999 in your web browser. You should see LogForMe running.
 
 ### Proceed with Non-Docker Installation
 
@@ -69,7 +71,7 @@ Time frames represent a period of work on a project. You can have multiple time 
 
 Time entries represent individual work sessions. Each time entry has a start time, an end time, and a duration. Time entries can be marked as "billable" or "non-billable". Only billable time entries will be included in the invoice when you generate it.
 
-You can log your entries manually by filling out the form, or you can use the stopwatch feature to quickly log time. You can startuse the stopwatch, and once your done stop it and Choose "Convert to Time Entry" to quickly create a time entry with the duration set to the time elapsed on the stopwatch. The Stopwatch feature does not automatically create time entries for you unless you choose to convert the stopwatch time into a time entry.
+You can log your entries manually by filling out the form, or you can use the stopwatch feature to quickly log time. You can start the stopwatch, and once you're done stop it and choose "Convert to Time Entry" to quickly create a time entry with the duration set to the time elapsed on the stopwatch. The stopwatch feature does not automatically create time entries for you unless you choose to convert the stopwatch time into a time entry.
 
 Invoices are generated based on time frames. When a time frame is marked as "done", you get the option to generate an invoice.
 
@@ -85,13 +87,13 @@ Preferences page allows you to set your hourly rate, currency, and any invoice p
 2. Define a new time frame for "Project A", called "Sprint 1", for example, and start the stopwatch.
 3. Log your daily work sessions on that sprint, either by using the stopwatch or by defining start and end times of the period, and add an optional description of the work done to appear on the invoice.
 4. Once you finish working on that sprint, mark the time frame as "done" and generate an invoice for it.
-5. you can download it and send it to your client.
+5. You can download it and send it to your client.
 
 # Video Demonstration
 
-Watch the video demonstration of the Time Logger application in action:
+Watch the video demonstration of LogForMe in action:
 
-[![Time Logger Demo](https://img.youtube.com/vi/g6bwqajpCQs/0.jpg)](https://youtu.be/g6bwqajpCQs)
+[![LogForMe Demo](https://img.youtube.com/vi/g6bwqajpCQs/0.jpg)](https://youtu.be/g6bwqajpCQs)
 
 # Screenshots
 
@@ -152,7 +154,7 @@ Fancy stuff that can be added in the future:
 
 Contributions are welcome! Please open an issue or submit a pull request with your changes or your feature request.
 
-# SUPPORT THE PROJECT
+# Support the Project
 
 If you find this project useful and want to support its development, you can star it, share it with whoever you think might benefit from it, or even contribute to the project by submitting a pull request with new features, bug fixes, or improvements. Your support is greatly appreciated!
 
